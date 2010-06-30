@@ -49,6 +49,8 @@ class BloggerBlog(models.Model):
     # our ORM members
     name = models.CharField(max_length=255)
     slug = models.SlugField(unique=True, max_length=255, null=True, blank=True)
+    paginate = models.BooleanField(default=True)
+    per_page = models.IntegerField(default=10)
     blog_id = models.CharField(max_length=100, unique=True)
     last_synced = models.DateTimeField(blank=True, null=True)
     minimum_synctime = models.IntegerField(choices=HOUR_CHOICES, default=12)
@@ -157,3 +159,5 @@ class BloggerPost(models.Model):
 
     class Meta:
         ordering = ('-published', '-updated')
+
+
