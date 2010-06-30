@@ -74,15 +74,17 @@ class BloggerBlog(models.Model):
             return ('blogger:via_pk', (), {'blog_id': self.pk})
 
     def sync_posts(self, forced=False):
+        new_posts = 0
         if forced or self.needs_synced:
             _posts = list()
             xml = parse(urllib.urlopen(BloggerBlog.post_url % self.blog_id))
             entries = xml.getElementsByTagName('entry')
             for post in entries:
-                BloggerPost.from_xml(post, self)
+                post, created = BloggerPost.from_xml(post, self)
+                if created: new_posts += 1
             self.last_synced = datetime.now()
             self.save()
-            return True
+            return new_posts
         else:
             return False
 
