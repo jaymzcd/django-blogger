@@ -3,16 +3,20 @@ import urllib
 import re
 
 from django.db import models
-from base.models import Nameable
 from datetime import datetime, timedelta
 
-class BloggerUser(Nameable):
+class BloggerUser(models.Model):
 
     # 'static' stuff
     profile_url = 'http://www.blogger.com/feeds/%s/blogs'
 
     # ORM members
+    name = models.CharField(max_length=255)
+    slug = models.SlugField(unique=True, max_length=255, null=True, blank=True)
     blogger_id = models.CharField(max_length=100)
+
+    def __unicode__(self):
+        return self.name
 
     def create_blogs(self):
         cnt = 0
@@ -29,7 +33,7 @@ class BloggerUser(Nameable):
         return cnt
 
 
-class BloggerBlog(Nameable):
+class BloggerBlog(models.Model):
     """
         Represents a blog on blogger via its id.
     """
@@ -43,9 +47,22 @@ class BloggerBlog(Nameable):
     )
 
     # our ORM members
+    name = models.CharField(max_length=255)
+    slug = models.SlugField(unique=True, max_length=255, null=True, blank=True)
     blog_id = models.CharField(max_length=100, unique=True)
     last_synced = models.DateTimeField(blank=True, null=True)
     minimum_synctime = models.IntegerField(choices=HOUR_CHOICES, default=12)
+
+    def __unicode__(self):
+        return self.name
+
+    @property
+    def url(self):
+        """ Returns the key part of the URL to access this blog via django """
+        if self.slug:
+            return self.slug
+        else:
+            return self.pk
 
     def sync_posts(self, forced=False):
         if forced or self.needs_synced:
