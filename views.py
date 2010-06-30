@@ -1,6 +1,6 @@
 from django.views.generic.list_detail import object_list
 from django.shortcuts import get_object_or_404
-from blogger.models import BloggerBlog, BloggerPost
+from blogger.models import BloggerBlog
 
 def blog_via_slug(request, slug):
     _slug = slug # this always feels ugly

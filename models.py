@@ -64,6 +64,13 @@ class BloggerBlog(models.Model):
         else:
             return self.pk
 
+    @models.permalink
+    def get_absolute_url(self):
+        if self.slug:
+            return ('blogger:via_slug', [self.slug])
+        else:
+            return ('blogger:via_pk', (), {'blog_id': self.pk})
+
     def sync_posts(self, forced=False):
         if forced or self.needs_synced:
             _posts = list()
