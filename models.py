@@ -15,6 +15,7 @@ class BloggerUser(Nameable):
     blogger_id = models.CharField(max_length=100)
 
     def create_blogs(self):
+        cnt = 0
         xml = parse(urllib.urlopen(BloggerUser.profile_url % self.blogger_id))
         for entry in xml.getElementsByTagName('entry'):
             blog_raw_id = entry.getElementsByTagName('id')[0].childNodes[0].data
@@ -24,6 +25,8 @@ class BloggerUser(Nameable):
                 blog_id=blog,
                 name=blog_name,
             )
+            if created: cnt += 1
+        return cnt
 
 
 class BloggerBlog(Nameable):
