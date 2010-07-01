@@ -11,6 +11,13 @@ STATUS_CHOICES = (
     (5, 'Live'),
 )
 
+def get_links(xml):
+    data = {}
+    links = xml.getElementsByTagName('link')
+    for link in links:
+        data.update({link.getAttribute('rel'): link.getAttribute('href')})
+    return data
+
 class LiveManager(models.Manager):
     def get_query_set(self):
         return super(LiveManager, self).get_query_set().filter(status=5)
@@ -35,15 +42,12 @@ class BloggerUser(models.Model):
             blog_raw_id = entry.getElementsByTagName('id')[0].childNodes[0].data
             blog_name = entry.getElementsByTagName('title')[0].childNodes[0].data
             blog_url = None
-            links = entry.getElementsByTagName('link')
-            for link in links:
-                if link.getAttribute('rel')=='alternate':
-                    blog_url = link.getAttribute('href')
+            links = get_links(entry)
             blog = re.findall("([\d]+)", blog_raw_id)[-1] # grab last match
             django_blog, created = BloggerBlog.objects.get_or_create(
                 blog_id=blog,
                 name=blog_name,
-                blogger_url=blog_url,
+                blogger_url=links['alternate'],
             )
             if created: cnt += 1
         return cnt
@@ -84,8 +88,8 @@ class BloggerBlog(models.Model):
     last_synced = models.DateTimeField(blank=True, null=True)
     minimum_synctime = models.IntegerField(choices=HOUR_CHOICES, default=12)
 
-    live = LiveManager()
     objects = models.Manager()
+    live = LiveManager()
 
     class Meta:
         ordering = ('category', 'order', 'name')
@@ -137,6 +141,18 @@ class BloggerBlog(models.Model):
     def posts(self):
         return BloggerPost.objects.all().filter(blog=self)
 
+class BloggerAuthor(models.Model):
+    # This is for holding author info. This might seem the same as the user model
+    # but its more for holding the basic author data that is present in the feed.
+    # You can add more fields in here if you want to display something specific
+    # for a blog post's author (eg. the photo field here)
+    name = models.CharField(max_length=100)
+    email = models.EmailField(unique=True)
+    photo = models.ImageField(upload_to='uploads/blogger/authors/', blank=True, null=True)
+    opensocial_id = models.CharField(max_length=50, unique=True)
+
+    def __unicode__(self):
+        return self.name
 
 class BloggerPost(models.Model):
     # Holds post info as a form of caching/archiving and easy of use
@@ -153,13 +169,11 @@ class BloggerPost(models.Model):
     link_edit = models.URLField(verify_exists=False, blank=True, null=True)
     link_self = models.URLField(verify_exists=False, blank=True, null=True)
     link_alternate = models.URLField(verify_exists=False, blank=True, null=True)
-    author_name = models.CharField(max_length=200)
-    author_email = models.EmailField(blank=True, null=True)
-
+    author = models.ForeignKey(BloggerAuthor, blank=True, null=True)
     status = models.IntegerField(default=5, choices=STATUS_CHOICES) # added to control on our end
 
-    live = LiveManager()
     objects = models.Manager()
+    live = LiveManager()
 
     @staticmethod
     def from_xml(entry, _blog):
@@ -174,6 +188,13 @@ class BloggerPost(models.Model):
             except IndexError:
                 return None
 
+        author_xml = entry.getElementsByTagName('author')[0]
+        _author, created = BloggerAuthor.objects.get_or_create(
+            email=author_xml.getElementsByTagName('email')[0].childNodes[0].data,
+            name=author_xml.getElementsByTagName('name')[0].childNodes[0].data,
+            opensocial_id=author_xml.getElementsByTagName('gd:extendedProperty')[0].getAttribute('value')
+        )
+
         post, created = BloggerPost.objects.get_or_create(
             blog=_blog,
             post_id=get_content('id'),
@@ -182,6 +203,7 @@ class BloggerPost(models.Model):
             title=get_content('title'),
             content=get_content('content'),
             content_type=entry.getElementsByTagName('content')[0].getAttribute('type'),
+            author=_author,
         )
         return [post, created]
 
@@ -190,8 +212,23 @@ class BloggerPost(models.Model):
         return len(striptags(self.content).split(' '))
 
     @property
+    def remaining_words(self):
+        count = self.wordcount - self.blog.teaser_length
+        if count <= 0:
+            return 0
+        else:
+            return count
+
+    @property
     def teaser(self):
         return ' '.join(striptags(self.content).split(' ')[:self.blog.teaser_length])
+
+    @property
+    def list_content(self):
+        if self.blog.show_teaser:
+            return self.teaser
+        else:
+            return self.content
 
     class Meta:
         ordering = ('-published', '-updated')

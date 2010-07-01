@@ -1,5 +1,5 @@
 from django.contrib import admin
-from blogger.models import BloggerBlog, BloggerUser, BloggerPost
+from blogger.models import BloggerBlog, BloggerUser, BloggerPost, BloggerAuthor
 from blogger.forms import BlogAdminForm
 
 class UserAdmin(admin.ModelAdmin):
@@ -34,5 +34,5 @@ class PostAdmin(admin.ModelAdmin):
 admin.site.register(BloggerBlog, BlogAdmin)
 admin.site.register(BloggerPost, PostAdmin)
 admin.site.register(BloggerUser, UserAdmin)
-
+admin.site.register(BloggerAuthor)
 
