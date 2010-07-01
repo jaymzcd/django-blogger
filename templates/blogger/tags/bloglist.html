@@ -1,7 +1,7 @@
 {% for blog in blogs %}
     {% ifchanged blog.category %}
         {% if not forloop.first %}</ul>{% endif %}
-        <h3>{{ blog.category }}</h3>
+        {% if blog.category %}<h3>{{ blog.category }}</h3>{% endif %}
         <ul id="blogger-bloglist">
     {% endifchanged %}
             <li><a href="{{ blog.get_absolute_url }}">{{ blog.name }}</a></li>

@@ -3,6 +3,7 @@ import urllib
 import re
 
 from django.db import models
+from django.template.defaultfilters import striptags
 from datetime import datetime, timedelta
 
 STATUS_CHOICES = (
@@ -17,7 +18,7 @@ class LiveManager(models.Manager):
 class BloggerUser(models.Model):
 
     # 'static' stuff
-    profile_url = 'http://www.blogger.com/feeds/%s/blogs'
+    _profile_url = 'http://www.blogger.com/feeds/%s/blogs'
 
     # ORM members
     name = models.CharField(max_length=255)
@@ -29,14 +30,20 @@ class BloggerUser(models.Model):
 
     def create_blogs(self):
         cnt = 0
-        xml = parse(urllib.urlopen(BloggerUser.profile_url % self.blogger_id))
+        xml = parse(urllib.urlopen(BloggerUser._profile_url % self.blogger_id))
         for entry in xml.getElementsByTagName('entry'):
             blog_raw_id = entry.getElementsByTagName('id')[0].childNodes[0].data
             blog_name = entry.getElementsByTagName('title')[0].childNodes[0].data
+            blog_url = None
+            links = entry.getElementsByTagName('link')
+            for link in links:
+                if link.getAttribute('rel')=='alternate':
+                    blog_url = link.getAttribute('href')
             blog = re.findall("([\d]+)", blog_raw_id)[-1] # grab last match
             django_blog, created = BloggerBlog.objects.get_or_create(
                 blog_id=blog,
                 name=blog_name,
+                blogger_url=blog_url,
             )
             if created: cnt += 1
         return cnt
@@ -47,7 +54,8 @@ class BloggerBlog(models.Model):
         Represents a blog on blogger via its id.
     """
     # 'static' stuff & choice fields
-    post_url = 'http://www.blogger.com/feeds/%s/posts/default'
+    _post_url = 'http://www.blogger.com/feeds/%s/posts/default'
+    _teaser_length = 80
     HOUR_CHOICES = (
         (1, 1),
         (6, 6),
@@ -57,12 +65,19 @@ class BloggerBlog(models.Model):
 
     # our ORM members
     name = models.CharField(max_length=255)
-    slug = models.SlugField(unique=True, max_length=255, null=True, blank=True)
+    slug = models.SlugField(unique=True, max_length=255, null=True, blank=True) # see forms.py for info
+    blogger_url = models.URLField(verify_exists=False)
     status = models.IntegerField(default=5, choices=STATUS_CHOICES) # switch it off from the main site
+    banner = models.ImageField(upload_to='uploads/blogger/banners/', blank=True, null=True)
+    banner.help_text = 'An image to use for the blogs header on the site'
     paginate = models.BooleanField(default=True)
     per_page = models.IntegerField(default=10)
     category = models.CharField(max_length=100, blank=True, null=True)
     category.help_text = 'For ordering the blogs under common categories'
+    show_teaser = models.BooleanField(default=True)
+    show_teaser.help_text = 'When enabled the full post will be stripped to a short text version'
+    teaser_length = models.IntegerField(default=80)
+    teaser_length.help_text = 'Tags will be stripped, so this is plain text words to show'
     order = models.IntegerField(default=5)
     order.help_text = 'Used to specifically order the blog list'
     blog_id = models.CharField(max_length=100, unique=True)
@@ -97,7 +112,7 @@ class BloggerBlog(models.Model):
         new_posts = 0
         if forced or self.needs_synced:
             _posts = list()
-            xml = parse(urllib.urlopen(BloggerBlog.post_url % self.blog_id))
+            xml = parse(urllib.urlopen(BloggerBlog._post_url % self.blog_id))
             entries = xml.getElementsByTagName('entry')
             for post in entries:
                 post, created = BloggerPost.from_xml(post, self)
@@ -169,6 +184,14 @@ class BloggerPost(models.Model):
             content_type=entry.getElementsByTagName('content')[0].getAttribute('type'),
         )
         return [post, created]
+
+    @property
+    def wordcount(self):
+        return len(striptags(self.content).split(' '))
+
+    @property
+    def teaser(self):
+        return ' '.join(striptags(self.content).split(' ')[:self.blog.teaser_length])
 
     class Meta:
         ordering = ('-published', '-updated')

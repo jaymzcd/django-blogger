@@ -1,6 +1,6 @@
 from django.contrib import admin
 from blogger.models import BloggerBlog, BloggerUser, BloggerPost
-
+from blogger.forms import BlogAdminForm
 
 class UserAdmin(admin.ModelAdmin):
 
@@ -14,8 +14,11 @@ class UserAdmin(admin.ModelAdmin):
 
 class BlogAdmin(admin.ModelAdmin):
     list_display = ('name', 'total_posts', 'category', 'order', 'last_synced',)
-    list_editable = ('category', 'order')
+    list_editable = ('order',)
+    list_filter = ('category', 'last_synced')
     actions = ['sync_blog',]
+
+    form = BlogAdminForm
 
     def sync_blog(self, request, queryset):
         for blog in queryset:
