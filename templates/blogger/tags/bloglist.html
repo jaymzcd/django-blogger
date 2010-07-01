@@ -1,5 +1,7 @@
-<ul id="blogger-bloglist">
 {% for blog in blogs %}
-    <li><a href="{{ blog.get_absolute_url }}">{{ blog.name }}</a></li>
+
+    {% ifchanged blog.category %}<ul id="blogger-bloglist">{% endifchanged %}
+        <li><a href="{{ blog.get_absolute_url }}">{{ blog.name }}</a></li>
+    {% ifchanged blog.category %}</ul>{% endifchanged %}
+
 {% endfor %}
-</ul>

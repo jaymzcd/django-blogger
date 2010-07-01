@@ -63,12 +63,17 @@ class BloggerBlog(models.Model):
     per_page = models.IntegerField(default=10)
     category = models.CharField(max_length=100, blank=True, null=True)
     category.help_text = 'For ordering the blogs under common categories'
+    order = models.IntegerField(default=5)
+    order.help_text = 'Used to specifically order the blog list'
     blog_id = models.CharField(max_length=100, unique=True)
     last_synced = models.DateTimeField(blank=True, null=True)
     minimum_synctime = models.IntegerField(choices=HOUR_CHOICES, default=12)
 
     live = LiveManager()
     objects = models.Manager()
+
+    class Meta:
+        ordering = ('category', 'order', 'name')
 
     def __unicode__(self):
         return self.name
