@@ -1,0 +1,8 @@
+{% load blogger_tags %}
+
+{% get_latest_posts as posts %}
+{% for post in posts %}
+    <a href="{{ post.get_absolute_url }}">{{ post.title }}</a> from
+        <a href="{{ post.blog.get_absolute_url }}">{{ post.blog.name }}</a>
+{% endfor %}
+

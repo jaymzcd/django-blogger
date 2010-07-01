@@ -1,4 +1,5 @@
 from django.views.generic.list_detail import object_list, object_detail
+from django.views.generic.simple import direct_to_template
 from django.shortcuts import get_object_or_404
 from blogger.models import BloggerBlog, BloggerPost
 
@@ -30,3 +31,6 @@ def post(request, post_id, post_title, blog_id=None, slug=None):
     # url nicely along with the slugified text
     return object_detail(request, BloggerPost.live.all(), object_id=post_id)
 
+def homepage(request):
+
+    return direct_to_template(request, 'blogger/homepage.html')

@@ -180,6 +180,9 @@ class BloggerPost(models.Model):
     objects = models.Manager()
     live = LiveManager()
 
+    def __unicode__(self):
+        return '%s %s' % (self.title, self.blog.name)
+
     @staticmethod
     def from_xml(entry, _blog):
         """ Creates a new BloggerPost from input XML. See the below link for schema:

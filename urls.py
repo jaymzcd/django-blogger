@@ -6,15 +6,13 @@ from blogger.models import BloggerBlog
 #
 # (r'^blogs/', include('blogger.urls', namespace='blogger'))
 
-urlpatterns = patterns('',
-    (r'^(?P<blog_id>\d+)/(?P<post_id>\d+)/(?P<post_title>[\w-]+)/$', 'blogger.views.post', {}, 'post_via_pk'),
-    (r'^(?P<slug>[\w-]+)/(?P<post_id>\d+)/(?P<post_title>[\w-]+)/$', 'blogger.views.post', {}, 'post_via_slug'),
+urlpatterns = patterns('blogger.views',
+    # These feel like I'm not being completely DRY, moist perhaps...
+    (r'^(?P<blog_id>\d+)/(?P<post_id>\d+)/(?P<post_title>[\w-]+)/$', 'post', {}, 'post_via_pk'),
+    (r'^(?P<slug>[\w-]+)/(?P<post_id>\d+)/(?P<post_title>[\w-]+)/$', 'post', {}, 'post_via_slug'),
 
+    (r'^(?P<blog_id>\d+)/$', 'blog', {}, 'via_pk'),
+    (r'^(?P<slug>[\w-]+)/$', 'blog', {}, 'via_slug'),
 
-    (r'^(?P<blog_id>\d+)/$', 'blogger.views.blog', {}, 'via_pk'),
-    (r'^(?P<slug>[\w-]+)/$', 'blogger.views.blog', {}, 'via_slug'),
-
+    (r'^$', 'homepage', {}, 'home'),
 )
-
-
-
