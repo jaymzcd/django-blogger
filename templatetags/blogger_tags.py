@@ -1,5 +1,6 @@
 import re
 from django import template
+from django.db.models import Count
 from blogger.models import BloggerBlog, BloggerPost
 
 register = template.Library()
@@ -30,3 +31,15 @@ def latest_posts(parser, token):
         print "no parameters"
     var_name = m.groups()[0]
     return PostContextNode(var_name)
+
+@register.simple_tag
+def archive_counts(_blog=None):
+    posts = BloggerPost.live.all()
+    if _blog:
+        posts = posts.filter(blog=_blog)
+
+    return posts.extra(select={
+        'year': "EXTRACT(year FROM published)",
+        'month': "EXTRACT(month from published)"
+    }).values('year', 'month').annotate(count=Count('pk'))
+
