@@ -7,9 +7,10 @@ class Command(BaseCommand):
     help = 'Syncs existing Blogger blogs via their RSS feeds'
 
     def handle(self, *args, **options):
-        count = 0
+        total_count = 0
         for blog in BloggerBlog.objects.all():
-            count += blog.sync_posts(forced=True)
+            count = blog.sync_posts(forced=True)
+            total_count += count
             sys.stdout.write('Synced %s - %d posts\n' % (blog.name, count))
-        sys.stdout.write('\nCOMPLETE: All blogs synced\n\n')
+        sys.stdout.write('\nCOMPLETE: All blogs synced - %d posts\n\n' % total_count)
 
