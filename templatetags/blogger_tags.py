@@ -6,5 +6,5 @@ register = template.Library()
 @register.inclusion_tag('blogger/tags/bloglist.html')
 def bloglist():
     return {
-        'blogs': BloggerBlog.objects.all(),
+        'blogs': BloggerBlog.live.all(),
     }

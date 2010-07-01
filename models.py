@@ -5,6 +5,15 @@ import re
 from django.db import models
 from datetime import datetime, timedelta
 
+STATUS_CHOICES = (
+    (0, 'Offline'),
+    (5, 'Live'),
+)
+
+class LiveManager(models.Manager):
+    def get_query_set(self):
+        return super(LiveManager, self).get_query_set().filter(status=5)
+
 class BloggerUser(models.Model):
 
     # 'static' stuff
@@ -49,11 +58,17 @@ class BloggerBlog(models.Model):
     # our ORM members
     name = models.CharField(max_length=255)
     slug = models.SlugField(unique=True, max_length=255, null=True, blank=True)
+    status = models.IntegerField(default=5, choices=STATUS_CHOICES) # switch it off from the main site
     paginate = models.BooleanField(default=True)
     per_page = models.IntegerField(default=10)
+    category = models.CharField(max_length=100, blank=True, null=True)
+    category.help_text = 'For ordering the blogs under common categories'
     blog_id = models.CharField(max_length=100, unique=True)
     last_synced = models.DateTimeField(blank=True, null=True)
     minimum_synctime = models.IntegerField(choices=HOUR_CHOICES, default=12)
+
+    live = LiveManager()
+    objects = models.Manager()
 
     def __unicode__(self):
         return self.name
@@ -103,19 +118,10 @@ class BloggerBlog(models.Model):
         return BloggerPost.objects.all().filter(blog=self)
 
 
-class PostManager(models.Manager):
-    def get_query_set(self):
-        return super(PostManager, self).get_query_set().filter(status=5)
-
 class BloggerPost(models.Model):
     # Holds post info as a form of caching/archiving and easy of use
     # When a request is made for blog posts it will create new entries
     # here for the blog.
-
-    STATUS_CHOICES = (
-        (0, 'Offline'),
-        (5, 'Live'),
-    )
 
     blog = models.ForeignKey(BloggerBlog)
     post_id = models.CharField(max_length=255, unique=True)
@@ -132,7 +138,7 @@ class BloggerPost(models.Model):
 
     status = models.IntegerField(default=5, choices=STATUS_CHOICES) # added to control on our end
 
-    live = PostManager()
+    live = LiveManager()
     objects = models.Manager()
 
     @staticmethod

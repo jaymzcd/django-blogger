@@ -13,7 +13,8 @@ class UserAdmin(admin.ModelAdmin):
     create_blogs.short_description = 'Create the empty blogs from a particular user profile'
 
 class BlogAdmin(admin.ModelAdmin):
-    list_display = ('name', 'total_posts', 'last_synced',)
+    list_display = ('name', 'total_posts', 'category', 'last_synced',)
+    list_editable = ('category',)
     actions = ['sync_blog',]
 
     def sync_blog(self, request, queryset):
