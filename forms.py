@@ -13,3 +13,7 @@ class BlogAdminForm(forms.ModelForm):
     def clean_slug(self):
         return self.cleaned_data['slug'] or None
 
+    def clean_category(self):
+        return self.cleaned_data['category'] or None
+
+

@@ -3,7 +3,7 @@ import urllib
 import re
 
 from django.db import models
-from django.template.defaultfilters import striptags
+from django.template.defaultfilters import striptags, slugify
 from datetime import datetime, timedelta
 
 STATUS_CHOICES = (
@@ -70,6 +70,7 @@ class BloggerBlog(models.Model):
     # our ORM members
     name = models.CharField(max_length=255)
     slug = models.SlugField(unique=True, max_length=255, null=True, blank=True) # see forms.py for info
+    blog_id = models.CharField(max_length=100, unique=True)
     blogger_url = models.URLField(verify_exists=False)
     status = models.IntegerField(default=5, choices=STATUS_CHOICES) # switch it off from the main site
     banner = models.ImageField(upload_to='uploads/blogger/banners/', blank=True, null=True)
@@ -84,7 +85,6 @@ class BloggerBlog(models.Model):
     teaser_length.help_text = 'Tags will be stripped, so this is plain text words to show'
     order = models.IntegerField(default=5)
     order.help_text = 'Used to specifically order the blog list'
-    blog_id = models.CharField(max_length=100, unique=True)
     last_synced = models.DateTimeField(blank=True, null=True)
     minimum_synctime = models.IntegerField(choices=HOUR_CHOICES, default=12)
 
@@ -141,6 +141,10 @@ class BloggerBlog(models.Model):
     def posts(self):
         return BloggerPost.objects.all().filter(blog=self)
 
+    @property
+    def authors(self):
+        return BloggerAuthor.objects.all().filter(blog=self)
+
 class BloggerAuthor(models.Model):
     # This is for holding author info. This might seem the same as the user model
     # but its more for holding the basic author data that is present in the feed.
@@ -149,7 +153,8 @@ class BloggerAuthor(models.Model):
     name = models.CharField(max_length=100)
     email = models.EmailField() # !unique, noreply@blogger.com can appear >1
     photo = models.ImageField(upload_to='uploads/blogger/authors/', blank=True, null=True)
-    opensocial_id = models.CharField(max_length=50, unique=True)
+    blog = models.ForeignKey(BloggerBlog)
+    opensocial_id = models.CharField(max_length=50)
 
     def __unicode__(self):
         return self.name
@@ -192,7 +197,8 @@ class BloggerPost(models.Model):
         _author, created = BloggerAuthor.objects.get_or_create(
             email=author_xml.getElementsByTagName('email')[0].childNodes[0].data,
             name=author_xml.getElementsByTagName('name')[0].childNodes[0].data,
-            opensocial_id=author_xml.getElementsByTagName('gd:extendedProperty')[0].getAttribute('value')
+            opensocial_id=author_xml.getElementsByTagName('gd:extendedProperty')[0].getAttribute('value'),
+            blog=_blog,
         )
 
         post, created = BloggerPost.objects.get_or_create(
@@ -229,6 +235,14 @@ class BloggerPost(models.Model):
             return self.teaser
         else:
             return self.content
+
+    @models.permalink
+    def get_absolute_url(self):
+        title = slugify(self.title)
+        if self.blog.slug:
+            return ('blogger:post_via_slug', [self.blog.slug, self.pk, title])
+        else:
+            return ('blogger:post_via_pk', [self.blog.pk, self.pk, title])
 
     class Meta:
         ordering = ('-published', '-updated')

@@ -7,8 +7,12 @@ from blogger.models import BloggerBlog
 # (r'^blogs/', include('blogger.urls', namespace='blogger'))
 
 urlpatterns = patterns('',
-    (r'^(?P<blog_id>\d+)/$', 'blogger.views.blog_via_pk', {}, 'via_pk'),
-    (r'^(?P<slug>[\w-]+)/$', 'blogger.views.blog_via_slug', {}, 'via_slug'),
+    (r'^(?P<blog_id>\d+)/(?P<post_id>\d+)/(?P<post_title>[\w-]+)/$', 'blogger.views.post', {}, 'post_via_pk'),
+    (r'^(?P<slug>[\w-]+)/(?P<post_id>\d+)/(?P<post_title>[\w-]+)/$', 'blogger.views.post', {}, 'post_via_slug'),
+
+
+    (r'^(?P<blog_id>\d+)/$', 'blogger.views.blog', {}, 'via_pk'),
+    (r'^(?P<slug>[\w-]+)/$', 'blogger.views.blog', {}, 'via_slug'),
 
 )
 
