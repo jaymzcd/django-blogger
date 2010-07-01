@@ -9,6 +9,7 @@ from blogger.models import BloggerBlog
 urlpatterns = patterns('',
     (r'^(?P<blog_id>\d+)/$', 'blogger.views.blog_via_pk', {}, 'via_pk'),
     (r'^(?P<slug>[\w-]+)/$', 'blogger.views.blog_via_slug', {}, 'via_slug'),
+
 )
 
 

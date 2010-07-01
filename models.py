@@ -147,7 +147,7 @@ class BloggerAuthor(models.Model):
     # You can add more fields in here if you want to display something specific
     # for a blog post's author (eg. the photo field here)
     name = models.CharField(max_length=100)
-    email = models.EmailField(unique=True)
+    email = models.EmailField() # !unique, noreply@blogger.com can appear >1
     photo = models.ImageField(upload_to='uploads/blogger/authors/', blank=True, null=True)
     opensocial_id = models.CharField(max_length=50, unique=True)
 

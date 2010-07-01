@@ -1,16 +1,31 @@
 {# Very simple - for example only really, I have these overridden for my own particular view #}
 
+<h1>{{ blog.name }}</h1>
+{% if blog.banner %}
+    <img src="{{ MEDIA_URL }}{{ blog.banner }}" />
+{% endif %}
+<h2><a href="{{ blog.blogger_url }}" alt="{{ blog.name }} on Blogger" target="_blank">View on blogger</a></h2>
+
+{% for post in object_list %}
+    <div class="blogpost">
+        <h3>{{ post.title }}</h3>
+        <h4>{{ post.wordcount }}</h4>
+        {{ post.teaser }}
+        <a href="{{ post.get_absolute_url }}" alt="{{ post.title }}">
+        {% if post.remaining_words %}
+            Read the rest ({{ post.remaining_words }} more words)
+        {% else %}
+            Permalink
+        {% endif %}
+        </a>
+    </div>
+{% endfor %}
+
 <div id="blogger-pagination">
+    <p>Page:</p>
     <ul>
     {% for p in page_range %}
         <li><a href="{{ blog.get_absolute_url }}?page={{ p }}">{{ p }}</a></li>
     {% endfor %}
     </ul>
 </div>
-
-{% for post in object_list %}
-    <div class="blogpost">
-        <h3>{{ post.title }}</h3>
-        {{ post.content|safe }}
-    </div>
-{% endfor %}

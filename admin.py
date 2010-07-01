@@ -28,8 +28,8 @@ class BlogAdmin(admin.ModelAdmin):
 
 
 class PostAdmin(admin.ModelAdmin):
-    list_display = ('blog', 'title', 'status', 'published',)
-    list_filter = ('blog', 'published', 'status',)
+    list_display = ('blog', 'title', 'status', 'author', 'published',)
+    list_filter = ('blog', 'published', 'author', 'status',)
 
 admin.site.register(BloggerBlog, BlogAdmin)
 admin.site.register(BloggerPost, PostAdmin)
