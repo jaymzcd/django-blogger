@@ -204,6 +204,8 @@ class BloggerPost(models.Model):
             blog=_blog,
         )
 
+        links = get_links(entry)
+
         post, created = BloggerPost.objects.get_or_create(
             blog=_blog,
             post_id=get_content('id'),
@@ -213,6 +215,9 @@ class BloggerPost(models.Model):
             content=get_content('content'),
             content_type=entry.getElementsByTagName('content')[0].getAttribute('type'),
             author=_author,
+            link_edit=links['edit'],
+            link_self=links['self'],
+            link_alternate=links['alternate'],
         )
         return [post, created]
 

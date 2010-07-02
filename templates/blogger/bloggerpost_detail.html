@@ -1,4 +1,8 @@
+
 <div class="blogpost">
     <h3>{{ object.title }}</h3>
     {{ object.content|safe }}
+    <p>This was originally published on blogger.
+        <a href="{{ object.link_alternate }}" alt="View on blogger" target="_blank">View the original</a>
+    </p>
 </div>
