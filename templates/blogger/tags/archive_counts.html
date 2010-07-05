@@ -1,6 +1,6 @@
 {% for count_data in counts %}
 {% ifchanged count_data.year %}{% if not forloop.first %}</ul>{% endif %}
-    <h3>{{ count_data.year }}</h3>
+    <div class="titlebar"><h5>{{ count_data.year }}</h5></div>
     <ul class="blogger-archive" id="blogger-archive-{{ count_data.year }}">
 {% endifchanged %}
     <li>

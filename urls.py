@@ -13,7 +13,7 @@ urlpatterns = patterns('blogger.views',
     (r'^(?P<slug>[\w-]+)/(?P<year>\d{4})/(?P<month>\w+)/$', 'archive', {}, 'archive'),
     (r'^(?P<year>\d{4})/(?P<month>\w+)/$', 'archive', {}, 'archive'),
 
-    # Permalinks for blogs
+    # Permalinks for blogs, not blog specific in structure you'll notice
     (r'^(?P<slug>[\w-]+)/(?P<post_id>\d+)/(?P<post_title>[\w-]+)/$', 'post', {}, 'post'),
 
     # Blog landing pages
