@@ -1,0 +1,12 @@
+{% for count_data in counts %}
+{% ifchanged count_data.year %}{% if not forloop.first %}</ul>{% endif %}
+    <h3>{{ count_data.year }}</h3>
+    <ul class="blogger-archive" id="blogger-archive-{{ count_data.year }}">
+{% endifchanged %}
+    <li>
+        <a href="{% url blogger:archive count_data.year count_data.month %}">
+            {{ count_data.month }}&nbsp;({{ count_data.count }})
+        </a>
+    </li>
+{% if forloop.last %}</ul>{% endif %}
+{% endfor %}

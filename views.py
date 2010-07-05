@@ -32,5 +32,7 @@ def post(request, post_id, post_title, blog_id=None, slug=None):
     return object_detail(request, BloggerPost.live.all(), object_id=post_id)
 
 def homepage(request):
+    return direct_to_template(request, 'blogger/homepage.html')
 
+def archive(request, year, month):
     return direct_to_template(request, 'blogger/homepage.html')

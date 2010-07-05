@@ -32,14 +32,15 @@ def latest_posts(parser, token):
     var_name = m.groups()[0]
     return PostContextNode(var_name)
 
-@register.simple_tag
+@register.inclusion_tag('blogger/tags/archive_counts.html')
 def archive_counts(_blog=None):
     posts = BloggerPost.live.all()
     if _blog:
         posts = posts.filter(blog=_blog)
 
-    return posts.extra(select={
+    counts = posts.extra(select={
         'year': "EXTRACT(year FROM published)",
-        'month': "EXTRACT(month from published)"
+        'month': "MONTHNAME(published)"
     }).values('year', 'month').annotate(count=Count('pk'))
 
+    return {'counts': counts}
