@@ -107,10 +107,7 @@ class BloggerBlog(models.Model):
 
     @models.permalink
     def get_absolute_url(self):
-        if self.slug:
-            return ('blogger:via_slug', [self.slug])
-        else:
-            return ('blogger:via_pk', (), {'blog_id': self.pk})
+        return ('blogger:blog', [self.url])
 
     def sync_posts(self, forced=False):
         new_posts = 0
@@ -248,9 +245,9 @@ class BloggerPost(models.Model):
     def get_absolute_url(self):
         title = slugify(self.title)
         if self.blog.slug:
-            return ('blogger:post_via_slug', [self.blog.slug, self.pk, title])
+            return ('blogger:post', [self.blog.slug, self.pk, title])
         else:
-            return ('blogger:post_via_pk', [self.blog.pk, self.pk, title])
+            return ('blogger:post', [self.blog.pk, self.pk, title])
 
     class Meta:
         ordering = ('-published', '-updated')

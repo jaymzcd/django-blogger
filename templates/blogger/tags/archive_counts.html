@@ -4,7 +4,11 @@
     <ul class="blogger-archive" id="blogger-archive-{{ count_data.year }}">
 {% endifchanged %}
     <li>
-        <a href="{% url blogger:archive count_data.year count_data.month %}">
+        {% if blog %}
+            <a href="{% url blogger:archive blog.url count_data.year count_data.month %}">
+        {% else %}
+            <a href="{% url blogger:archive count_data.year count_data.month %}">
+        {% endif %}
             {{ count_data.month }}&nbsp;({{ count_data.count }})
         </a>
     </li>

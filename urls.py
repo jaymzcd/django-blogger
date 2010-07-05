@@ -7,18 +7,17 @@ from blogger.models import BloggerBlog
 # (r'^blogs/', include('blogger.urls', namespace='blogger'))
 
 urlpatterns = patterns('blogger.views',
+    # These feel like I'm not being completely DRY, moist perhaps...
 
     # Archive links
+    (r'^(?P<slug>[\w-]+)/(?P<year>\d{4})/(?P<month>\w+)/$', 'archive', {}, 'archive'),
     (r'^(?P<year>\d{4})/(?P<month>\w+)/$', 'archive', {}, 'archive'),
 
     # Permalinks for blogs
-    # These feel like I'm not being completely DRY, moist perhaps...
-    (r'^(?P<blog_id>\d+)/(?P<post_id>\d+)/(?P<post_title>[\w-]+)/$', 'post', {}, 'post_via_pk'),
-    (r'^(?P<slug>[\w-]+)/(?P<post_id>\d+)/(?P<post_title>[\w-]+)/$', 'post', {}, 'post_via_slug'),
+    (r'^(?P<slug>[\w-]+)/(?P<post_id>\d+)/(?P<post_title>[\w-]+)/$', 'post', {}, 'post'),
 
     # Blog landing pages
-    (r'^(?P<blog_id>\d+)/$', 'blog', {}, 'via_pk'),
-    (r'^(?P<slug>[\w-]+)/$', 'blog', {}, 'via_slug'),
+    (r'^(?P<slug>[\w-]+)/$', 'blog', {}, 'blog'),
 
     # Index
     (r'^$', 'homepage', {}, 'home'),

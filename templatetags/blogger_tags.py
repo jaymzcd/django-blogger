@@ -43,4 +43,4 @@ def archive_counts(_blog=None):
         'month': "MONTHNAME(published)"
     }).values('year', 'month').annotate(count=Count('pk'))
 
-    return {'counts': counts}
+    return {'counts': counts, 'blog': _blog}
