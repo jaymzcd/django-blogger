@@ -7,7 +7,7 @@ from blogger.models import BloggerBlog
 # (r'^blogs/', include('blogger.urls', namespace='blogger'))
 
 urlpatterns = patterns('blogger.views',
-    # These feel like I'm not being completely DRY, moist perhaps...
+    # The slug field will act as a fall back to PK if it doesnt exist before 404'ing
 
     # Archive links
     (r'^(?P<slug>[\w-]+)/(?P<year>\d{4})/(?P<month>\w+)/$', 'archive', {}, 'archive'),

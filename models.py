@@ -203,7 +203,12 @@ class BloggerPost(models.Model):
 
         links = get_links(entry)
 
-        post, created = BloggerPost.objects.get_or_create(
+        #TODO: this fails if content changes, refactor to pull out just the post_id
+        # to do the lookup first. Then update fields with the data from the XML so
+        # a resync causes updates
+
+        created = False
+        post_data = dict(
             blog=_blog,
             post_id=get_content('id'),
             published=get_content('published').replace('T', ' ')[:-6],
@@ -216,6 +221,13 @@ class BloggerPost(models.Model):
             link_self=links['self'],
             link_alternate=links['alternate'],
         )
+        try:
+            post = BloggerPost.objects.get(post_id=get_content('id'))
+        except BloggerPost.DoesNotExist:
+            created = True
+
+        post = BloggerPost(**post_data)
+
         return [post, created]
 
     @property
