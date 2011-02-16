@@ -194,10 +194,15 @@ class BloggerPost(models.Model):
                 return None
 
         author_xml = entry.getElementsByTagName('author')[0]
+        try:
+            osocial = author_xml.getElementsByTagName('gd:extendedProperty')[0].getAttribute('value'),
+        except IndexError:
+            osocial = 0
+
         _author, created = BloggerAuthor.objects.get_or_create(
             email=author_xml.getElementsByTagName('email')[0].childNodes[0].data,
             name=author_xml.getElementsByTagName('name')[0].childNodes[0].data,
-            opensocial_id=author_xml.getElementsByTagName('gd:extendedProperty')[0].getAttribute('value'),
+            opensocial_id=osocial,
             blog=_blog,
         )
 
